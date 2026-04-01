@@ -2,6 +2,8 @@
 
 OpenClaw is organised as a persistent orchestration layer plus a set of project modules, workers, tools, and operational services. The design goal is not maximum autonomy. It is useful, supervised automation that can run continuously and recover sensibly when parts of the system fail.
 
+> **Note on file references:** This doc references the full production codebase. The portfolio includes selected core files (`core/`, `projects/`, `agents/`). Files like `main.py`, `portal/`, `bot/`, and service units exist in production but aren't included here.
+
 ## High-Level View
 
 ```mermaid
@@ -37,9 +39,9 @@ flowchart TD
 
 ### Orchestrator
 
-The main runtime entrypoint is [`main.py`](../main.py). It starts:
+The main runtime entrypoint is `main.py`. It starts:
 
-- the Nexus orchestrator in [`core/nexus.py`](../core/nexus.py)
+- the Nexus orchestrator in `core/nexus.py`
 - the communications agent
 - the Telethon bridge
 - the Telegram bot
@@ -50,12 +52,12 @@ The main runtime entrypoint is [`main.py`](../main.py). It starts:
 
 ### Agents And Project Modules
 
-OpenClaw uses a project-based structure rather than a single undifferentiated agent. Each project extends [`projects/base.py`](../projects/base.py) and contributes tools and system context.
+OpenClaw uses a project-based structure rather than a single undifferentiated agent. Each project extends `projects/base.py` and contributes tools and system context.
 
-Current active modules in the repo:
+Current active modules:
 
-- `projects/utility_researcher/`
-- `projects/job_search/`
+- `projects/utility-researcher/`
+- `projects/job-search/`
 - `projects/reddit/`
 - `projects/trader/`
 
@@ -67,10 +69,10 @@ The tool layer sits between the orchestrator and the outside world. It is intent
 
 Examples:
 
-- [`tools/files.py`](../tools/files.py) for file access inside the repo
-- [`tools/web.py`](../tools/web.py) for web interactions
-- [`tools/email.py`](../tools/email.py) for inbox access
-- [`tools/shell.py`](../tools/shell.py) for a small allowlisted set of operational commands
+- `tools/files.py` for file access inside the repo
+- `tools/web.py` for web interactions
+- `tools/email.py` for inbox access
+- `tools/shell.py` for a small allowlisted set of operational commands
 
 This is one of the main safety boundaries in the system. The shell tool is restricted to a known set of commands, and most workflows rely on repo state and APIs rather than unconstrained command execution.
 
@@ -80,14 +82,14 @@ OpenClaw does not rely on one provider for everything.
 
 Hosted path:
 
-- OpenAI is used through a local gateway in [`core/openai_client.py`](../core/openai_client.py)
+- OpenAI is used through a local gateway in `core/openai_client.py`
 - Gemini is used as a fallback path in several orchestration and judgement flows
 - Gemini key rotation is handled in [`core/key_pool.py`](../core/key_pool.py)
 
 Local path:
 
 - [`core/researcher.py`](../core/researcher.py) runs a local researcher worker through Ollama
-- [`core/builder.py`](../core/builder.py) runs a local builder worker through Ollama
+- `core/builder.py` runs a local builder worker through Ollama
 - `docker-compose.yml` provisions Ollama and Open WebUI locally for that layer
 
 The practical result is that the system can use hosted models for orchestration and judgement while still keeping some research and coding work local.
@@ -112,7 +114,7 @@ There is no broad database-backed memory layer visible in this repo. If there ar
 OpenClaw includes a lightweight operational view rather than a full observability stack.
 
 - systemd service units show how the main runtime and portal are deployed
-- the portal backend in [`portal/server.py`](../portal/server.py) exposes service status, active projects, backlog, decision stats, and research output
+- the portal backend (`portal/server.py`) exposes service status, active projects, backlog, decision stats, and research output
 - logging is used throughout the runtime
 - tests exist for selected core behaviour such as carousel rotation and project logic
 
@@ -120,12 +122,10 @@ This is enough to answer a basic operational question: is the system up, what is
 
 ### Deployment
 
-The repo includes deployment artefacts for always-on operation:
+The production deployment uses:
 
-- [`openclaw.service`](../openclaw.service)
-- [`openclaw-portal.service`](../openclaw-portal.service)
-- [`openclaw-trader.service`](../openclaw-trader.service)
-- [`docker-compose.yml`](../docker-compose.yml)
+- `openclaw.service`, `openclaw-portal.service`, `openclaw-trader.service` — systemd units
+- `docker-compose.yml` — Ollama and Open WebUI containers
 
 This points to a cloud-hosted setup where the Python app runs under systemd and Ollama is containerised. The portal is served separately and bound to localhost, which is a sensible default for a read-only internal dashboard.
 

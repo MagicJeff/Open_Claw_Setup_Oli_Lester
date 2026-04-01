@@ -18,7 +18,7 @@ Long-running research and improvement loops can become noisy, drift off-topic, o
 
 ### The codebase accumulated monolithic files
 
-The refactor audit in [`docs/refactor-audit.md`](refactor-audit.md) is useful here. It shows that some of the hardest-won lessons were structural:
+The hardest-won lessons here were structural:
 
 - large orchestrator files become hard to reason about
 - fallback paths need verification, not just good intentions
@@ -95,10 +95,9 @@ Job search is already concrete. Other domains, especially research-heavy ones, s
 
 ## Evidence Of Iteration In The Repo
 
-- `docs/plans/` contains architecture and implementation planning notes.
-- `docs/superpowers/` shows more recent design and migration thinking.
-- `research/*/PLAYBOOK.md`, `DECISION_LOG.md`, and `reflection.md` show project-specific learning loops.
-- `tests/` covers selected core behaviours rather than leaving everything implicit.
+- `docs/decisions.md` documents the reasoning behind major technical choices, including where the original approach was wrong.
+- `docs/architecture.md` describes the current system structure and the trade-offs that shaped it.
+- Per-project `PLAYBOOK.md`, `DECISION_LOG.md`, and `reflection.md` files accumulate on the server as the carousel runs — they're the live record of what the system learned, not documented retrospectively.
 
 ## Bottom Line
 

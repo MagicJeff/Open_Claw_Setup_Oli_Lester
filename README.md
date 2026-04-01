@@ -159,6 +159,8 @@ Always-on service on Oracle Cloud (ARM Linux, 4 OCPUs, 24GB RAM):
 - Portal served as a separate systemd service
 - No manual intervention required for restarts or crash recovery
 
+The system has been running continuously since late 2024. The carousel has produced hundreds of approved research findings across active projects. Those outputs live on the server in per-project `PLAYBOOK.md` files and decision logs — they're not included here, but the infrastructure that generates them is.
+
 ## Tech Stack
 
 Python · Docker · Linux/systemd · Oracle Cloud · OpenAI Responses API · Google Gemini · Ollama · python-telegram-bot · Telethon · FastAPI · APScheduler · Git
@@ -177,6 +179,6 @@ The carousel's research engine. Fetches supplemental data in parallel from HN, a
 **[`core/researcher.py`](core/researcher.py)**
 Local model researcher worker. Semaphore-limited to 2 concurrent calls to avoid overloading the host. Explicit handling for connection errors, timeouts, and unexpected exceptions — each returns a descriptive string rather than raising, so one bad research call never crashes the carousel.
 
-**[`projects/job_search/scorer.py`](projects/job_search/scorer.py)**
+**[`projects/job-search/scorer.py`](projects/job-search/scorer.py)**
 Heuristic job scorer. Weighted signal matching across role type, AI/tool keywords, seniority markers, location, and hard disqualifiers. Scores 0–100, filters below 45. Designed to be replaced with LLM scoring in a later phase.
 
