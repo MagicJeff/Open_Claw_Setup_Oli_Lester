@@ -10,19 +10,17 @@ OpenClaw combines two things: a conversational orchestrator that responds to mes
 
 ## The Experiment Carousel
 
-The core of the system is a perpetual research loop — not a cron job or scheduled task, but a while loop that runs continuously as long as the service is up.
+The core of the system is a perpetual research loop — not a cron job or scheduled task, but a `while True` that runs continuously as long as the service is up.
 
-Each cycle:
+Each cycle pulls a topic from the active project's backlog and processes it through researcher → arbiter. The arbiter returns one of three decisions:
 
-1. Picks a topic from the active project's backlog
-2. Spawns a researcher (local DeepSeek model via Ollama) to investigate it
-3. Passes the findings to an arbiter (OpenAI primary, Gemini fallback)
-4. The arbiter returns one of three decisions:
-   - **APPROVE** — findings are written into the project playbook. Knowledge is additive: each approved finding compounds on what came before.
-   - **REFINE** — the topic has promise but the pass was too shallow. A sharper version is re-queued automatically.
-   - **DISCARD** — not worth pursuing. One sentence logged and the loop moves on.
+- **APPROVE** — findings are formatted and appended to the project's `PLAYBOOK.md`. The knowledge base is additive: every approved finding builds on what came before.
+- **REFINE** — the topic has real promise but the research pass was too shallow. A sharper, more specific version is automatically re-queued.
+- **DISCARD** — not worth pursuing. One line logged to the decision log and the loop moves on.
 
-The effect is that each project's knowledge base grows over time without any manual direction. The system self-steers via REFINE rather than repeating shallow passes on the same territory.
+When the backlog runs out of topics, the system doesn't start again blindly. It first runs a **reflection**: reads the full accumulated `PLAYBOOK.md` and `DECISION_LOG.md`, identifies what has already been established, what are confirmed dead ends, and what gaps still remain. A model then proposes 3 new research topics grounded in that reflection. A second model pass filters the proposals before they enter the backlog. Then the loop continues.
+
+The effect is a self-directing research engine: each batch of 3 topics is informed by everything that came before, dead ends don't get re-researched, and the knowledge base compounds over time without manual direction.
 
 The carousel can be paused, redirected to a different project, or have its backlog edited via runtime config — without touching code or restarting the service.
 
