@@ -35,6 +35,22 @@ Each domain runs as a module that registers its own tools and context with the o
 | **Reddit** | Researches community engagement strategy for an iOS game, builds a content backlog |
 | **Utility Researcher** | General-purpose improvement loop — surfaces friction in workflows and proposes fixes |
 
+## Claude Code Integration
+
+OpenClaw and Claude Code are designed to work as a pair. They communicate through the same Telegram channel, which makes the integration event-driven: OpenClaw sends a message when it needs something built or checked, and Claude Code responds — rather than Claude Code polling a folder on a timer and wasting tokens on empty checks.
+
+Claude Code runs a set of specialised agents, each in its own persistent terminal session:
+
+| Agent | What it does |
+|---|---|
+| **Builder** | Watches for build jobs queued by OpenClaw. When OpenClaw approves a code change and calls `queue_build_job`, it writes a job file to `plans/build_queue/`. The builder agent picks it up, implements the change, syncs it to the server, and sends a Telegram summary back to Oliver. |
+| **Health Checker** | Runs on a cron schedule — 8am daily report to Telegram, evening check. Monitors service status, carousel activity, key pool, memory, and build queue. Auto-fixes known issues silently. |
+| **Project Onboarder** | Runs a 5-question interview with Oliver to scaffold a new project — creates all required files, registers the project with the carousel, deploys, and confirms via Telegram. |
+| **Research Digest** | Runs Sunday evenings. Reads carousel playbooks and reflections across all projects, synthesises findings, proposes new research directions, and sends Oliver a summary. |
+| **CV Writer** | Triggered by OpenClaw's `queue_cv_build` tool. Receives a job description, writes a tailored CV as a Word document, and sends it to Oliver via Telegram. |
+
+The result is a feedback loop between the two systems: OpenClaw handles orchestration, research, and decision-making on the server. Claude Code handles implementation, file operations, and tasks that require a full development environment. Telegram is the message bus between them.
+
 ## Architecture
 
 ```mermaid
