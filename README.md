@@ -171,6 +171,9 @@ The arbiter that judges each research pass. Tries OpenAI first, falls back to Ge
 **[`core/key_pool.py`](core/key_pool.py)**
 Thread-safe rotating API key pool. Tracks per-key exhaustion with separate reset windows for quota errors (24h) and transient outages (60s). Round-robins across available keys; falls back to the least-recently-exhausted key when all are spent.
 
+**[`core/carousel_researcher.py`](core/carousel_researcher.py)**
+The carousel's research engine. Fetches supplemental data in parallel from HN, arXiv, Polymarket, and Reddit before passing everything to OpenAI for synthesis. Falls back to Gemini with Google Search grounding if OpenAI fails. Each project can have a `SOUL.md` — a personality/identity file that shapes how the researcher frames its findings for that domain.
+
 **[`core/researcher.py`](core/researcher.py)**
 Local model researcher worker. Semaphore-limited to 2 concurrent calls to avoid overloading the host. Explicit handling for connection errors, timeouts, and unexpected exceptions — each returns a descriptive string rather than raising, so one bad research call never crashes the carousel.
 
