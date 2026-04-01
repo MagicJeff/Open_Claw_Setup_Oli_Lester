@@ -135,14 +135,3 @@ Python · Docker · Linux/systemd · Oracle Cloud · OpenAI Responses API · Goo
 
 - [`src/contracts/project.py`](src/contracts/project.py) — base project interface: how domain modules register tools and context with the orchestrator
 
-## Why This Is Relevant For AI-Native Engineering
-
-The work that matters in AI-native engineering is not knowing which model is best — it is building systems that use models reliably, recovering from failures, routing work intelligently, and producing outputs that are actually useful. OpenClaw is evidence of that in practice.
-
-Specifically:
-
-- **Rapid prototyping and deployment** — ideas go from concept to running system, not notebook. Each project module was prototyped, evaluated, and either iterated or discarded based on output quality.
-- **Testing and comparing AI tools** — the system runs OpenAI, Gemini, DeepSeek, and Qwen models in parallel roles. I have practical intuition for where each performs well and where it fails.
-- **Translating capability into business value** — every module solves a real workflow problem. Job search automation, paper trading research, and utility research are not toy examples.
-- **AI governance and boundaries** — approval gates, allowlisted tools, and sandboxed writes are built into the architecture from the start, not added as an afterthought.
-- **Operating in production** — the system has been running continuously, failing and recovering, and improving through iteration. That is different from a project that ran once and worked.
