@@ -159,7 +159,7 @@ Always-on service on Oracle Cloud (ARM Linux, 4 OCPUs, 24GB RAM):
 - Portal served as a separate systemd service
 - No manual intervention required for restarts or crash recovery
 
-The system has been running continuously since late 2024. The carousel has produced hundreds of approved research findings across active projects. Those outputs live on the server in per-project `PLAYBOOK.md` files and decision logs — they're not included here, but the infrastructure that generates them is.
+The system has been running continuously since early 2026. The carousel has produced hundreds of approved research findings across active projects. Those outputs live on the server in per-project `PLAYBOOK.md` files and decision logs — they're not included here, but the infrastructure that generates them is.
 
 ## Tech Stack
 
