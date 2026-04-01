@@ -67,6 +67,14 @@ OpenClaw uses a mixed model setup:
 
 The real system stores much of its state in Markdown and small JSON files. That choice makes the system easier to inspect, debug, and review in git.
 
+Important patterns in that memory layer:
+
+- a local memory file system for objectives, plans, research, and operating notes
+- an append-oriented build log where new implementation decisions are recorded rather than rewritten away
+- handover-friendly notes so new or fresh-context agents can pick up work without relying on hidden conversation state
+
+This is less about “memory” in the abstract and more about operational continuity. The system keeps enough written context that a new agent session can recover the current state of play quickly.
+
 ### Observability
 
 The operating model is intentionally lightweight:
@@ -80,9 +88,20 @@ The operating model is intentionally lightweight:
 
 1. The main service starts and loads configuration.
 2. The orchestrator initialises project modules and tools.
-3. User requests and scheduled jobs are routed through the same orchestration layer.
-4. The background carousel processes research backlogs independently of interactive requests.
-5. Outputs are written to persistent state and surfaced through logs or the portal.
+3. Persistent memory, objectives, and recent build decisions are loaded so fresh sessions inherit working context.
+4. User requests and scheduled jobs are routed through the same orchestration layer.
+5. The background carousel processes research backlogs independently of interactive requests.
+6. Outputs are written to persistent state and surfaced through logs or the portal.
+
+## Review Cadence
+
+The operating rhythm is part of the architecture, not just a habit around it.
+
+- Sunday review: a weekly synthesis pass over research output to identify trends, promising directions, and dead ends
+- `8am` review: a start-of-day checkpoint for small steering changes
+- `4pm` review: an end-of-day checkpoint to assess what shifted and what should change next
+
+Those reviews work because the system keeps written state. Without the build log, research notes, and handover files, a fresh agent would have to reconstruct too much from scratch.
 
 ## Failure Handling
 

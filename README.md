@@ -2,6 +2,8 @@
 
 OpenClaw is a multi-agent AI system I designed and operate as an always-on service for practical workflows such as research, job search support, task coordination, and trading research. This public snapshot is a clean, shareable repository designed to show how the system is structured, what engineering decisions sit behind it, and what parts of the implementation are representative, without publishing private runtime state or personal data.
 
+One of the core ideas behind the system is that agents should not depend on a single fragile context window. OpenClaw keeps a local Markdown memory layer, appends important build decisions to a running build log, and uses structured handovers so fresh-context agents can resume useful work quickly.
+
 ## Why This Public Repo Exists
 
 The full working repository contains personal memory files, live operational state, local environment details, and project-specific working artefacts. That makes it a bad candidate for a first public GitHub link.
@@ -22,6 +24,7 @@ This snapshot is the safer portfolio version. It is meant to answer five questio
 - practical workflow descriptions
 - representative code patterns taken from the real system architecture
 - public-safe configuration examples
+- the memory and review model used to keep long-running work coherent
 
 ## What Is Intentionally Omitted
 
@@ -85,6 +88,7 @@ openclaw-public/
 - mixed model routing across hosted and local models
 - project module boundaries instead of one giant agent prompt
 - file-backed state for transparency and auditability
+- append-only build logs and handover notes for fresh-context agents
 - supervised automation with narrow tool boundaries
 - lightweight observability over heavyweight infrastructure
 
@@ -94,6 +98,16 @@ More detail:
 - [docs/decisions.md](docs/decisions.md)
 - [docs/use-cases.md](docs/use-cases.md)
 - [docs/operations.md](docs/operations.md)
+
+## Review And Steering Cadence
+
+OpenClaw is operated with a regular review rhythm rather than left to drift:
+
+- a weekly Sunday review to analyse research output for trends, dead ends, and direction changes
+- an `8am` check-in to set the day’s direction
+- a `4pm` check-in to review what changed and make small steering adjustments
+
+That cadence matters because it shows the system is managed like an active working process, not treated as a fire-and-forget automation.
 
 ## Representative Code
 
