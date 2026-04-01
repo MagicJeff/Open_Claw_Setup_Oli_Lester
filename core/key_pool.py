@@ -96,7 +96,7 @@ class GeminiKeyPool:
             return len(self._keys) - exhausted
 
 
-# Singleton — shared across Flash, Comms, and carousel arbiter
+# Singleton — shared across Nexus, Comms, and carousel arbiter
 _pool: GeminiKeyPool | None = None
 
 
