@@ -54,65 +54,54 @@ The result is a feedback loop between the two systems: OpenClaw handles orchestr
 ## Architecture
 
 ```mermaid
-flowchart LR
-    subgraph CC["Claude Code (local)"]
-        CCB[Builder]
-        CCH[Health checker]
-        CCP[Project onboarder]
-        CCD[Research digest]
-    end
+flowchart TD
+    classDef user fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    classDef orch fill:#dcfce7,stroke:#22c55e,color:#14532d
+    classDef tool fill:#f0fdf4,stroke:#86efac,color:#14532d
+    classDef carousel fill:#fef9c3,stroke:#facc15,color:#713f12
+    classDef model fill:#fce7f3,stroke:#ec4899,color:#831843
+    classDef store fill:#ede9fe,stroke:#a78bfa,color:#4c1d95
+    classDef cc fill:#ffedd5,stroke:#fb923c,color:#7c2d12
 
-    TG([Telegram])
+    U([Oliver · Telegram]):::user
+    CC["Claude Code\nBuilder · Health · Onboarder · Digest"]:::cc
 
-    subgraph SERVER["Oracle Cloud — 24/7 service"]
-        N[NexusOS Orchestrator]
+    U <-->|Telegram| N
+    CC <-->|event-driven · Telegram| N
+    CC -->|rsync + restart| CLOUD
 
-        subgraph TOOLS["Tool layer"]
-            WEB[Web / email]
-            FILES[Files / plans]
-            SHELL[Allowlisted shell]
-        end
+    subgraph CLOUD["☁  Oracle Cloud — always on"]
+        N[NexusOS Orchestrator]:::orch
+        PM["Project modules\nJob Search · Trader · Reddit · Utility"]:::tool
+        TL["Tools\nWeb · Files · Allowlisted shell"]:::tool
 
-        subgraph PROJECTS["Project modules"]
-            JS[Job Search]
-            TR[Trader]
-            RD[Reddit]
-            UR[Utility Researcher]
-        end
+        subgraph CAR["  Experiment Carousel — perpetual loop  "]
+            BL[(Backlog)]:::store
+            RES[Researcher]:::carousel
+            ARB[Arbiter]:::carousel
+            PB[(Playbook\nadditive)]:::store
+            LOG[(Decision log)]:::store
+            REF["Reflect · gen 3 topics · filter"]:::carousel
 
-        subgraph CAROUSEL["Experiment Carousel"]
-            BL[(Backlog)] -->|dequeue| RES[Researcher]
-            RES --> ARB[Arbiter]
-            ARB -->|APPROVE| PB[(Playbook)]
+            BL -->|dequeue| RES --> ARB
+            ARB -->|APPROVE| PB
             ARB -->|REFINE| BL
-            ARB -->|DISCARD| DL[(Decision log)]
-            BL -->|empty| REF[Reflection]
-            REF --> GEN[Generate 3 topics]
-            GEN -->|filter pass| BL
+            ARB -->|DISCARD| LOG
+            BL -->|backlog empty| REF --> BL
         end
 
-        N --> TOOLS
-        N --> PROJECTS
-        N --- CAROUSEL
+        N --> PM & TL & CAR
     end
 
-    subgraph MODELS["Models"]
-        OAI[OpenAI]
-        GEM[Gemini]
-        OLL[Ollama]
+    subgraph MODELS["AI providers"]
+        OAI[OpenAI · primary]:::model
+        GEM[Gemini · fallback]:::model
+        OLL[Ollama · local]:::model
     end
 
-    CC <-->|event-driven| TG
-    TG <--> N
-    CCB -->|rsync| SERVER
-
-    N <--> OAI
-    N -.fallback.-> GEM
-    RES --> OAI
-    RES -.fallback.-> GEM
-    RES --> OLL
-    ARB --> OAI
-    ARB -.fallback.-> GEM
+    N & ARB -->|primary| OAI
+    N & RES & ARB -.->|fallback| GEM
+    RES -->|local| OLL
 ```
 
 More detail: [docs/architecture.md](docs/architecture.md)
