@@ -39,28 +39,51 @@ Each domain runs as a module that registers its own tools and context with the o
 
 ```mermaid
 flowchart TD
-    U[User via Telegram] --> N[NexusOS orchestrator]
-    S[APScheduler jobs] --> N
-    N --> P[Project modules]
-    P --> J[Job Search]
-    P --> R[Reddit]
-    P --> T[Trader]
-    P --> U2[Utility Researcher]
-    N --> TL[Tool layer]
-    TL --> F[Files and plans]
-    TL --> W[Web and email tools]
-    TL --> SH[Allowlisted shell ops]
-    N --> OAI[OpenAI via local gateway]
-    N -. fallback .-> GEM[Gemini]
-    C[Experiment carousel] --> CR[Researcher and arbiter loop]
-    CR --> OAI
-    CR -. fallback .-> GEM
-    CR --> OLL[Local models via Ollama]
-    OLL --> LR[Researcher worker]
-    OLL --> LB[Builder worker]
-    N --> MEM[Markdown memory and runtime config]
-    C --> MEM
-    N --> OBS[Logs, systemd, portal]
+    subgraph USER["User-facing"]
+        U([Telegram]) --> N[NexusOS Orchestrator]
+        SCH([Scheduler]) --> N
+        N --> TOOLS[Tool Layer]
+        TOOLS --> WEB[Web / email]
+        TOOLS --> FILES[Files / plans]
+        TOOLS --> SHELL[Allowlisted shell]
+    end
+
+    subgraph MODELS["Model layer"]
+        OAI[OpenAI]
+        GEM[Gemini]
+        OLL[Ollama — local]
+    end
+
+    subgraph CAROUSEL["Experiment Carousel — perpetual loop"]
+        direction TB
+        BL[(Topic backlog)] -->|dequeue| RES[Researcher]
+        RES --> ARB[Arbiter]
+        ARB -->|APPROVE| PB[(PLAYBOOK.md\nadditive knowledge)]
+        ARB -->|REFINE| BL
+        ARB -->|DISCARD| DL[(Decision log)]
+        BL -->|empty| REF[Reflection\nread PLAYBOOK + DECISION_LOG]
+        REF --> GEN[Propose 3 topics]
+        GEN --> FILT[Filter pass]
+        FILT --> BL
+    end
+
+    N <--> OAI
+    N -.fallback.-> GEM
+    RES --> OAI
+    RES -.fallback.-> GEM
+    RES --> OLL
+    ARB --> OAI
+    ARB -.fallback.-> GEM
+
+    subgraph PROJECTS["Project modules"]
+        JS[Job Search]
+        TR[Trader]
+        RD[Reddit]
+        UR[Utility Researcher]
+    end
+
+    N --> PROJECTS
+    CAROUSEL --> PROJECTS
 ```
 
 More detail: [docs/architecture.md](docs/architecture.md)
