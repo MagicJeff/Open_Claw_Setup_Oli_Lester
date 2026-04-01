@@ -1,106 +1,68 @@
 # OpenClaw Use Cases
 
-This document focuses on practical workflows that are supported by the codebase as it exists in the repo.
+Practical workflows the system supports in production.
 
-## 1. Job Search Discovery And CV Tailoring
+## 1. Job Search — Discovery, Scoring, And CV Generation
 
-### User Problem
+**Problem:** Finding relevant roles is noisy. Tailoring a CV for each one is repetitive and easy to do badly under time pressure.
 
-Finding relevant roles is noisy, and tailoring a CV for each role is repetitive and easy to do badly under time pressure.
+**How it works:**
 
-### Agents And Tools Involved
+- Daily scheduled scan searches for live roles matching a target profile
+- Each result is scored 0–100 using weighted signal matching across role type, AI/tool keywords, seniority markers, and location — filtered below 45
+- High-scoring roles are surfaced to Oliver via Telegram
+- Oliver can trigger `queue_cv_build` with a job description; the CV Writer Claude Code agent writes a tailored CV as a Word document and sends it back via Telegram
 
-- `NexusOS` orchestrator
-- `projects/job_search/project.py`
-- job search and scoring helpers in `projects/job_search/`
-- CV repository files in `projects/job_search/cv_repository/`
-- scheduled daily job search scans in `bot/scheduler.py`
+**What this replaces:** Manual job board browsing, copy-paste CV editing under time pressure.
 
-### Output Or Result
+## 2. Continuous Research Via The Experiment Carousel
 
-The system can search for live roles, score them against the user profile, cache job descriptions, and generate tailored CV drafts saved back into the repository for review.
+**Problem:** Keeping multiple long-running projects moving forward without constantly deciding what to research next.
 
-## 2. Continuous Research Backlog For Active Projects
+**How it works:**
 
-### User Problem
+- The carousel runs perpetually, cycling through active project backlogs
+- Each cycle: researcher fetches supplemental data (HN, arXiv, Polymarket, Reddit) and synthesises findings; arbiter decides APPROVE / REFINE / DISCARD
+- Approved findings are appended to the project playbook — additive, compounding knowledge
+- When the backlog empties, a reflection pass reads accumulated knowledge and generates 3 new grounded topics
+- The carousel self-directs: REFINE re-queues sharper versions, dead ends stay in the decision log and aren't re-researched
 
-It is hard to keep multiple long-running ideas moving forward without constantly deciding what to research next.
+**What this replaces:** Ad hoc research sessions that lose continuity between conversations.
 
-### Agents And Tools Involved
+## 3. AI-Assisted Build Pipeline
 
-- experiment carousel in `core/experiment_loop.py`
-- backlog files in `projects/*/experiment_backlog.md`
-- researcher and arbiter loops
-- project playbooks and reflection files in `research/`
+**Problem:** OpenClaw can identify improvements but can't safely implement multi-file code changes on itself.
 
-### Output Or Result
+**How it works:**
 
-The system can pick from a project backlog, run a research pass, decide whether the result is worth keeping, and write approved knowledge back into project artefacts.
+- When Oliver approves a proposed change, OpenClaw calls `queue_build_job` with a description
+- The Claude Code builder agent picks up the job, implements it locally, rsyncs to the server, restarts the service, and sends a Telegram confirmation
+- The entire cycle — proposal, approval, implementation, deployment — happens without Oliver touching a terminal
 
-## 3. Utility Research And Codebase Audit
+**What this replaces:** Manual implementation of every system improvement, context-switching between planning and building.
 
-### User Problem
+## 4. Trading Research And Thesis Tracking
 
-A growing personal AI system needs regular review for architectural, performance, and reliability issues.
+**Problem:** Developing a paper trading thesis requires consistent research and a way to track conviction over time.
 
-### Agents And Tools Involved
+**How it works:**
 
-- `projects/utility_researcher/project.py`
-- parallel local researcher calls through `core/researcher.py`
-- git-backed output written into `research/`
+- The trader carousel module researches topics from a watchlist-oriented backlog
+- Approved findings are written as structured thesis documents with conviction levels (LOW / MEDIUM / HIGH)
+- HIGH conviction findings trigger an alert
+- A running watchlist tracks all active theses, dates, and status
 
-### Output Or Result
+**What this replaces:** Scattered notes and inconsistent follow-through on investment ideas.
 
-The system can audit the codebase across focus areas, summarise findings, and store a structured report that is easy to review later.
+## 5. Operational Monitoring
 
-## 4. Scheduled Briefings And Daily Prompts
+**Problem:** When a system runs continuously, you need a quick way to see whether it is healthy and what it is doing.
 
-### User Problem
+**How it works:**
 
-An always-on system is only useful if it surfaces what matters at the right time without manual prompting.
+- The health checker Claude Code agent runs at 8am and 7pm daily
+- Checks: service status, carousel activity, key pool availability, memory usage, build queue
+- Auto-fixes known issues silently; sends a Telegram summary with anything that needs attention
+- A read-only portal also shows live service state, active projects, and recent carousel output
 
-### Agents And Tools Involved
-
-- scheduler in `bot/scheduler.py`
-- Telegram bot interface
-- orchestrator summaries over plans, reflections, job search state, and research output
-
-### Output Or Result
-
-The system can send scheduled briefings, job search scans, and profile-building prompts to the user at defined times, using the same orchestration layer as interactive chat.
-
-## 5. Trading Research And Paper Portfolio Tracking
-
-### User Problem
-
-Tracking ideas and paper positions across a developing trading thesis is hard to do consistently by hand.
-
-### Agents And Tools Involved
-
-- `projects/trader/project.py`
-- paper trading helpers in `projects/trader/paper_trader.py`
-- trader watchlist and playbook files in `research/trader/`
-
-### Output Or Result
-
-The system can maintain a watchlist-oriented research workflow and track simulated paper positions, including open positions and trade history.
-
-## 6. Operational Monitoring Through The Portal
-
-### User Problem
-
-When a system runs continuously, you need a quick way to see whether it is healthy and what it is working on.
-
-### Agents And Tools Involved
-
-- portal backend in `portal/server.py`
-- static portal frontend in `portal/static/`
-- runtime config, service checks, backlog parsing, and research file reads
-
-### Output Or Result
-
-The portal can show whether key services are active, which projects are running, which models are available in Ollama, and what recent research or backlog state looks like.
-
-## Notes On Scope
-
-This list is intentionally conservative. The repo includes signs of additional agent workflows and experimental services, but the workflows above are the clearest capabilities I can support directly from the current codebase.
+**What this replaces:** SSHing into the server to check logs manually.
