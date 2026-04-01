@@ -163,19 +163,17 @@ Always-on service on Oracle Cloud (ARM Linux, 4 OCPUs, 24GB RAM):
 
 Python · Docker · Linux/systemd · Oracle Cloud · OpenAI Responses API · Google Gemini · Ollama · python-telegram-bot · Telethon · FastAPI · APScheduler · Git
 
-## Code
+## Selected Implementation Details
 
-**Orchestration and workers**
+**[`core/carousel_arbiter.py`](core/carousel_arbiter.py)**
+The arbiter that judges each research pass. Tries OpenAI first, falls back to Gemini with key pool rotation on 429/503. Parses structured APPROVE / REFINE / DISCARD decisions from model output using regex, with a safe default to DISCARD on malformed responses.
 
-- [`core/researcher.py`](core/researcher.py) — local model researcher worker: semaphore-limited concurrency, Ollama API, structured error handling
-- [`core/carousel_arbiter.py`](core/carousel_arbiter.py) — multi-model judgement layer: OpenAI primary, Gemini fallback with key rotation, structured APPROVE/REFINE/DISCARD output parsing
-- [`core/key_pool.py`](core/key_pool.py) — thread-safe Gemini key pool: round-robin rotation, per-key quota tracking, 24h vs transient backoff distinction
+**[`core/key_pool.py`](core/key_pool.py)**
+Thread-safe rotating API key pool. Tracks per-key exhaustion with separate reset windows for quota errors (24h) and transient outages (60s). Round-robins across available keys; falls back to the least-recently-exhausted key when all are spent.
 
-**Domain logic**
+**[`core/researcher.py`](core/researcher.py)**
+Local model researcher worker. Semaphore-limited to 2 concurrent calls to avoid overloading the host. Explicit handling for connection errors, timeouts, and unexpected exceptions — each returns a descriptive string rather than raising, so one bad research call never crashes the carousel.
 
-- [`projects/job_search/scorer.py`](projects/job_search/scorer.py) — heuristic job scorer: weighted signal matching across role, AI, skill, seniority, and location dimensions
-
-**Interfaces**
-
-- [`src/contracts/project.py`](src/contracts/project.py) — base project interface: how domain modules register tools and context with the orchestrator
+**[`projects/job_search/scorer.py`](projects/job_search/scorer.py)**
+Heuristic job scorer. Weighted signal matching across role type, AI/tool keywords, seniority markers, location, and hard disqualifiers. Scores 0–100, filters below 45. Designed to be replaced with LLM scoring in a later phase.
 
