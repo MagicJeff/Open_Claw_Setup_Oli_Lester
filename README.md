@@ -6,13 +6,36 @@ This is not a demo. It runs 24/7 on cloud infrastructure and is used daily.
 
 ## What It Does
 
-| Workflow | What actually happens |
+OpenClaw combines two things: a conversational orchestrator that responds to messages and executes tasks on demand, and a continuous background research engine that runs independently of any user interaction. Both feed into the same project modules and memory layer.
+
+## The Experiment Carousel
+
+The core of the system is a perpetual research loop — not a cron job or scheduled task, but a while loop that runs continuously as long as the service is up.
+
+Each cycle:
+
+1. Picks a topic from the active project's backlog
+2. Spawns a researcher (local DeepSeek model via Ollama) to investigate it
+3. Passes the findings to an arbiter (OpenAI primary, Gemini fallback)
+4. The arbiter returns one of three decisions:
+   - **APPROVE** — findings are written into the project playbook. Knowledge is additive: each approved finding compounds on what came before.
+   - **REFINE** — the topic has promise but the pass was too shallow. A sharper version is re-queued automatically.
+   - **DISCARD** — not worth pursuing. One sentence logged and the loop moves on.
+
+The effect is that each project's knowledge base grows over time without any manual direction. The system self-steers via REFINE rather than repeating shallow passes on the same territory.
+
+The carousel can be paused, redirected to a different project, or have its backlog edited via runtime config — without touching code or restarting the service.
+
+## Projects
+
+Each domain runs as a module that registers its own tools and context with the orchestrator. Current active projects:
+
+| Project | What it does |
 |---|---|
-| Job search | Daily scan of live roles, scored against a profile, CV drafts generated and saved |
-| Continuous research | A perpetual loop (not a cron job) cycles through project backlogs, runs research, then passes findings to an arbiter that scores them APPROVE / REFINE / DISCARD. Approved findings are written back into project playbooks — the loop is additive, so each project's knowledge base compounds over time. REFINE re-queues a sharper version of the topic so the system self-directs rather than repeating shallow passes. |
-| Trading research | Maintains a watchlist and paper-trades a developing thesis, logging positions and decisions |
-| Operational monitoring | Read-only portal shows service health, active projects, model availability, and recent output |
-| Scheduled briefings | Morning and evening summaries sent to Telegram using the same orchestration layer as interactive chat |
+| **Job Search** | Scans live roles daily, scores them against a profile, generates tailored CV drafts, tracks applications |
+| **Trader** | Researches a developing paper-trading thesis, maintains a watchlist, logs positions and decisions |
+| **Reddit** | Researches community engagement strategy for an iOS game, builds a content backlog |
+| **Utility Researcher** | General-purpose improvement loop — surfaces friction in workflows and proposes fixes |
 
 ## Architecture
 
