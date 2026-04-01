@@ -83,6 +83,14 @@ flowchart TD
         FILT --> BL
     end
 
+    subgraph CC["Claude Code — local"]
+        direction TB
+        CCB[Builder agent]
+        CCH[Health checker]
+        CCP[Project onboarder]
+        CCD[Research digest]
+    end
+
     N <--> OAI
     N -.fallback.-> GEM
     RES --> OAI
@@ -100,6 +108,9 @@ flowchart TD
 
     N --> PROJECTS
     CAROUSEL --> PROJECTS
+
+    N <-->|Telegram| CC
+    CCB -->|rsync + restart| SERVER[(Oracle Cloud)]
 ```
 
 More detail: [docs/architecture.md](docs/architecture.md)
