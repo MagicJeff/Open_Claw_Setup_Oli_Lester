@@ -1,0 +1,11 @@
+{
+  "carousel_paused": false,
+  "carousel_slot_cooldown_secs": 600,
+  "carousel_active_projects": [
+    "utility_researcher",
+    "job_search",
+    "trader"
+  ],
+  "researcher_model": "deepseek-r1:8b",
+  "builder_model": "qwen2.5-coder:7b"
+}
