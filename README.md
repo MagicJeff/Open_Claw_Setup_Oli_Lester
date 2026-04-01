@@ -54,42 +54,57 @@ The result is a feedback loop between the two systems: OpenClaw handles orchestr
 ## Architecture
 
 ```mermaid
-flowchart TD
-    subgraph USER["User-facing"]
-        U([Telegram]) --> N[NexusOS Orchestrator]
-        SCH([Scheduler]) --> N
-        N --> TOOLS[Tool Layer]
-        TOOLS --> WEB[Web / email]
-        TOOLS --> FILES[Files / plans]
-        TOOLS --> SHELL[Allowlisted shell]
-    end
-
-    subgraph MODELS["Model layer"]
-        OAI[OpenAI]
-        GEM[Gemini]
-        OLL[Ollama — local]
-    end
-
-    subgraph CAROUSEL["Experiment Carousel — perpetual loop"]
-        direction TB
-        BL[(Topic backlog)] -->|dequeue| RES[Researcher]
-        RES --> ARB[Arbiter]
-        ARB -->|APPROVE| PB[(PLAYBOOK.md\nadditive knowledge)]
-        ARB -->|REFINE| BL
-        ARB -->|DISCARD| DL[(Decision log)]
-        BL -->|empty| REF[Reflection\nread PLAYBOOK + DECISION_LOG]
-        REF --> GEN[Propose 3 topics]
-        GEN --> FILT[Filter pass]
-        FILT --> BL
-    end
-
-    subgraph CC["Claude Code — local"]
-        direction TB
-        CCB[Builder agent]
+flowchart LR
+    subgraph CC["Claude Code (local)"]
+        CCB[Builder]
         CCH[Health checker]
         CCP[Project onboarder]
         CCD[Research digest]
     end
+
+    TG([Telegram])
+
+    subgraph SERVER["Oracle Cloud — 24/7 service"]
+        N[NexusOS Orchestrator]
+
+        subgraph TOOLS["Tool layer"]
+            WEB[Web / email]
+            FILES[Files / plans]
+            SHELL[Allowlisted shell]
+        end
+
+        subgraph PROJECTS["Project modules"]
+            JS[Job Search]
+            TR[Trader]
+            RD[Reddit]
+            UR[Utility Researcher]
+        end
+
+        subgraph CAROUSEL["Experiment Carousel"]
+            BL[(Backlog)] -->|dequeue| RES[Researcher]
+            RES --> ARB[Arbiter]
+            ARB -->|APPROVE| PB[(Playbook)]
+            ARB -->|REFINE| BL
+            ARB -->|DISCARD| DL[(Decision log)]
+            BL -->|empty| REF[Reflection]
+            REF --> GEN[Generate 3 topics]
+            GEN -->|filter pass| BL
+        end
+
+        N --> TOOLS
+        N --> PROJECTS
+        N --- CAROUSEL
+    end
+
+    subgraph MODELS["Models"]
+        OAI[OpenAI]
+        GEM[Gemini]
+        OLL[Ollama]
+    end
+
+    CC <-->|event-driven| TG
+    TG <--> N
+    CCB -->|rsync| SERVER
 
     N <--> OAI
     N -.fallback.-> GEM
@@ -98,19 +113,6 @@ flowchart TD
     RES --> OLL
     ARB --> OAI
     ARB -.fallback.-> GEM
-
-    subgraph PROJECTS["Project modules"]
-        JS[Job Search]
-        TR[Trader]
-        RD[Reddit]
-        UR[Utility Researcher]
-    end
-
-    N --> PROJECTS
-    CAROUSEL --> PROJECTS
-
-    N <-->|Telegram| CC
-    CCB -->|rsync + restart| SERVER[(Oracle Cloud)]
 ```
 
 More detail: [docs/architecture.md](docs/architecture.md)
