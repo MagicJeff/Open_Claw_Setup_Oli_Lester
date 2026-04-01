@@ -106,6 +106,9 @@ More detail: [docs/architecture.md](docs/architecture.md)
 
 ## Key Engineering Decisions
 
+**Why the OpenClaw / Claude Code split exists**
+When OpenClaw was first built, using subscription-based frontier models on a 24/7 server wasn't viable — so the system ran on Google's free API tier with key rotation across multiple projects to stay within quota. That constraint is what drove the rotating key pool design. Once OpenAI access became available via a local gateway, it replaced Gemini as the primary orchestration path for better reliability and output quality. Claude Code was kept as the implementation layer because it remains the most capable model for complex code changes — and because it has access to the local filesystem, development tools, and can rsync directly to the server. The split isn't a workaround; it's the right tool for each job.
+
 **Multi-provider routing rather than single-provider lock-in**
 OpenAI is the primary path, Gemini is the fallback, and Ollama handles local worker tasks. Different workloads have different latency, cost, and reliability profiles. Hardcoding one provider is a fragility I didn't want.
 
