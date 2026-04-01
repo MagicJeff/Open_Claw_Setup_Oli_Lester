@@ -9,7 +9,7 @@ This is not a demo. It runs 24/7 on cloud infrastructure and is used daily.
 | Workflow | What actually happens |
 |---|---|
 | Job search | Daily scan of live roles, scored against a profile, CV drafts generated and saved |
-| Continuous research | Background carousel picks topics from project backlogs, runs research, judges output, writes findings back into project knowledge |
+| Continuous research | A perpetual loop (not a cron job) cycles through project backlogs, runs research, then passes findings to an arbiter that scores them APPROVE / REFINE / DISCARD. Approved findings are written back into project playbooks — the loop is additive, so each project's knowledge base compounds over time. REFINE re-queues a sharper version of the topic so the system self-directs rather than repeating shallow passes. |
 | Trading research | Maintains a watchlist and paper-trades a developing thesis, logging positions and decisions |
 | Operational monitoring | Read-only portal shows service health, active projects, model availability, and recent output |
 | Scheduled briefings | Morning and evening summaries sent to Telegram using the same orchestration layer as interactive chat |
